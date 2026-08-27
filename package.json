@@ -1,0 +1,26 @@
+{
+  "name": "ai-agents",
+  "version": "1.0.0",
+  "description": "learing to build ai agent and mcp",
+  "keywords": [
+    "AI",
+    "Agents",
+    "MCP",
+    "TS"
+  ],
+  "license": "ISC",
+  "author": "Shahzad",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@openai/agents": "^0.17.0",
+    "axios": "^1.19.0",
+    "dotenv": "^17.4.2",
+    "resend": "^6.22.1",
+    "zod": "^4.4.3"
+  }
+}
