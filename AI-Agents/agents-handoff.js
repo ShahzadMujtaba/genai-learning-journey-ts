@@ -130,7 +130,7 @@ const receptionAgent = new Agent({
     - Refund Agent: Handles existing-customer refunds and refund
       requests.
   `,
-  handoffs: [salesAgent, refundAgent],
+  //   handoffs: [salesAgent, refundAgent],
   outputType: responseSchema,
 });
 async function main(query = "") {
