@@ -1,7 +1,6 @@
 import { Agent, tool, run } from "@openai/agents";
-import { string, z } from "zod";
+import { z } from "zod";
 import fs from "node:fs/promises";
-import { runInNewContext } from "node:vm";
 import dotenv from "dotenv";
 dotenv.config({
   path: "../.env",
@@ -37,7 +36,7 @@ const processRefund = tool({
   execute: async function ({ customerId, reason, planId }) {
     const newRandomFile = Math.floor(Math.random() * 100000);
 
-    const fileName = `.refund-${newRandomFile}.txt`;
+    const fileName = `.refund-multi-agent-${newRandomFile}.txt`;
     await fs.appendFile(
       fileName,
       `Refund for Customer ${customerId} for Plan ${planId}. Reason: ${reason}\n`,
