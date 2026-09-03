@@ -57,41 +57,123 @@ const processRefund = tool({
   },
 });
 
+// const refundAgent = new Agent({
+//   name: "Refund Agent",
+//   instructions: `
+//     You are an expert in processing customer refunds.
+
+//     Before processing a refund, make sure you have:
+//     - customerId
+//     - planId
+//     - reason for the refund
+
+//     Never invent customer information.
+//     If required information is missing, ask the customer for it.
+//     Only call process_refund when all required information is available.
+//   `,
+//   tools: [processRefund],
+// });
 const refundAgent = new Agent({
   name: "Refund Agent",
+
   instructions: `
     You are an expert in processing customer refunds.
 
-    Before processing a refund, make sure you have:
+    You MUST collect these three pieces of information:
     - customerId
     - planId
-    - reason for the refund
+    - reason
 
     Never invent customer information.
-    If required information is missing, ask the customer for it.
-    Only call process_refund when all required information is available.
+
+    If any required information is missing, ask the customer for it.
+
+    If customerId, planId, and reason are available,
+    you MUST call the process_refund tool.
+
+    Do not claim that the refund system is unavailable unless
+    the process_refund tool actually returns an error indicating
+    that the system is unavailable.
   `,
+
   tools: [processRefund],
 });
+
+// const salesAgent = new Agent({
+//   name: "Sales Agent",
+//   instructions: `
+//     You are an expert sales agent for an internet broadband company.
+
+//     Help users with broadband plans and general questions.
+
+//     For refund requests, delegate the request to refund_expert.
+//     Do not invent customer information.
+//   `,
+//   tools: [
+//     fetchAvailablePlans,
+//     refundAgent.asTool({
+//       name: "refund_expert",
+//       toolDescription: "Handles refund questions and requests",
+//     }),
+//   ],
+//   //   outputType: refundSchema,
+// });
+
+// const receptionAgent = new Agent({
+//   name: "Reception Agent",
+//   instructions: `
+//     You are the reception agent for an internet broadband company.
+
+//     Determine what the customer needs and route them to the appropriate agent.
+
+//     Route customers asking about:
+//     - broadband plans
+//     - pricing
+//     - speed
+//     - choosing a plan
+//     - general sales questions
+
+//     to the Sales Agent.
+
+//     Route customers asking about:
+//     - refunds
+//     - cancelling a plan and getting a refund
+//     - refund status
+//     - existing-customer refund issues
+
+//     to the Refund Agent.
+
+//     Do not attempt to answer the customer's question yourself when
+//     one of the specialist agents is appropriate.
+//   `,
+//   handoffDescription: `
+//     Available agents:
+
+//     - Sales Agent: Handles broadband plans, pricing, speeds, and
+//       recommendations for customers.
+
+//     - Refund Agent: Handles existing-customer refunds and refund
+//       requests.
+//   `,
+//   handoffs: [salesAgent, refundAgent],
+//   outputType: responseSchema,
+// });
 
 const salesAgent = new Agent({
   name: "Sales Agent",
   instructions: `
     You are an expert sales agent for an internet broadband company.
 
-    Help users with broadband plans and general questions.
+    Help users with:
+    - broadband plans
+    - pricing
+    - speeds
+    - choosing a plan
+    - general sales questions
 
-    For refund requests, delegate the request to refund_expert.
-    Do not invent customer information.
+    Do not handle refunds.
   `,
-  tools: [
-    fetchAvailablePlans,
-    refundAgent.asTool({
-      name: "refund_expert",
-      toolDescription: "Handles refund questions and requests",
-    }),
-  ],
-  //   outputType: refundSchema,
+  tools: [fetchAvailablePlans],
 });
 
 const receptionAgent = new Agent({
@@ -101,38 +183,28 @@ const receptionAgent = new Agent({
 
     Determine what the customer needs and route them to the appropriate agent.
 
-    Route customers asking about:
+    For:
     - broadband plans
     - pricing
     - speed
     - choosing a plan
     - general sales questions
 
-    to the Sales Agent.
+    hand off to the Sales Agent.
 
-    Route customers asking about:
+    For:
     - refunds
     - cancelling a plan and getting a refund
     - refund status
     - existing-customer refund issues
 
-    to the Refund Agent.
+    hand off to the Refund Agent.
 
-    Do not attempt to answer the customer's question yourself when
-    one of the specialist agents is appropriate.
+    Do not attempt to process refunds yourself.
   `,
-  handoffDescription: `
-    Available agents:
-
-    - Sales Agent: Handles broadband plans, pricing, speeds, and
-      recommendations for customers.
-
-    - Refund Agent: Handles existing-customer refunds and refund
-      requests.
-  `,
-  //   handoffs: [salesAgent, refundAgent],
-  outputType: responseSchema,
+  handoffs: [salesAgent, refundAgent],
 });
+
 async function main(query = "") {
   const result = await run(receptionAgent, query);
   console.log("Result", result.finalOutput);
